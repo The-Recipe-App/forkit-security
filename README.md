@@ -70,19 +70,16 @@ security/
 │   ├── domains.py
 │   ├── resolver.py
 │   └── cache.py
-├── firewall/
-│   ├── middleware.py
-│   ├── rate_limit.py
-│   ├── strikes.py
-│   ├── strike_engine.py
-│   ├── blacklist.py
-│   ├── ip_rules.py
-│   ├── exceptions.py
-│   └── utils.py
-└── db/
-    ├── models.py
-    ├── session.py
-    └── init_db.py
+└── firewall/
+    ├── middleware.py
+    ├── rate_limit.py
+    ├── strikes.py
+    ├── strike_engine.py
+    ├── blacklist.py
+    ├── ip_rules.py
+    ├── exceptions.py
+    └── utils.py
+
 ```
 
 ---
@@ -122,8 +119,6 @@ All security events are stored in a portable SQL schema supporting:
 Extend:
 - `strike_engine.py`
 - `blacklist.py`
-- DB schema if needed
-
 ---
 
 ## Database Compatibility
@@ -134,6 +129,8 @@ Designed for:
 - MySQL / MariaDB
 
 No vendor-locked features are used.
+
+*However, as of this writing, neither the main nor the security database modules will be made public.*
 
 ---
 
