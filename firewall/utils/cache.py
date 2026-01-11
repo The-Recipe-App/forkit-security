@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from cachetools import TTLCache
 import asyncio
+from utilities.common.common_utility import debug_print
 
 # Max 50k entries, auto-expire after 24h
 BLOCK_CACHE = TTLCache(maxsize=50_000, ttl=24 * 3600)
@@ -22,6 +23,7 @@ async def cache_block(block):
             "is_permanent": block.is_permanent,
             "expires_at": block.expires_at,
         }
+        debug_print(f"Added {block.ip_address} to cache.", color="cyan", tag="FIREWALL")
 
 
 async def is_cached_blocked(ip: str, fingerprint: str | None):
@@ -44,6 +46,6 @@ async def is_cached_blocked(ip: str, fingerprint: str | None):
         if entry["expires_at"] and entry["expires_at"] > _now():
             return True, entry["reason"]
 
-        # Expired → remove
+        # Expired -> remove
         BLOCK_CACHE.pop(key, None)
         return False, None
