@@ -107,53 +107,71 @@ They are intentionally independent.
 ```mermaid
 flowchart LR
 
+%% ================== STYLES ==================
 classDef firewall fill:#1565c0,stroke:#0d47a1,color:#ffffff;
 classDef cerberus fill:#6a1b9a,stroke:#3e0f5f,color:#ffffff;
 classDef allow fill:#2e7d32,stroke:#1b5e20,color:#ffffff;
 classDef block fill:#c62828,stroke:#8e0000,color:#ffffff;
 classDef decision fill:#ffb300,stroke:#ff6f00,color:#000000;
+classDef neutral fill:#546e7a,stroke:#263238,color:#ffffff;
 
-    A[Incoming Request] --> B{Whitelisted?}
-    B -->|Yes| PASS[Fast Pass]:::allow
-    B -->|No| BL{Blacklisted?}
-    BL -->|Yes| DROP[403 Drop]:::block
+%% ================== FLOW ==================
+A[Incoming Request]:::neutral
+B{API Exempted?}:::decision
 
-    ID[Extract IP / Fingerprint / User / ASN]:::firewall
-    POL[Resolve Security Policy]:::firewall
+BY[Pass]:::allow
+BN0[Extract ID]:::neutral
+BN1{Blacklisted?}:::decision
 
-    TEL[Telemetry Stream]:::cerberus
-    AI[Behavior Models]:::cerberus
-    RISK{Risk Verdict}:::decision
+MIDD[Middleware]:::neutral
 
-    RL{Rate Limit OK?}:::decision
-    THROTTLE[429 Throttle]:::block
-    QUAR[Temporary Jail]:::block
-    ESC{Escalate?}:::decision
-    PERM[Permanent Ban]:::block
+F0[Firewall]:::firewall
+F1[Resolve Policy]:::firewall
+F2{Rate Limit Ok?}:::decision
 
-    APP[Forward to App]:::allow
-    RESP[Response]:::allow
-    END[Connection Closed]:::block
+FN0[Temporary Ban]:::block
+FN1{Escalate?}:::decision
+PB[Permanent Ban<br/>+ Record to DB]:::block
 
+C0[Cerberus]:::cerberus
+C1[Telemetry]:::cerberus
+C2[Behavior Analysis]:::cerberus
+C3{Risk Verdict}:::decision
 
-PASS --> APP
-BL -->|No| ID
-ID --> POL --> RL
-ID --> TEL --> AI --> RISK
+BLOCK[403 Blocked]:::block
+PASS[Forwarded to API Handler]:::allow
+RES[Response]:::neutral
 
-RISK -->|ALLOW| APP
-RISK -->|THROTTLE| THROTTLE --> END
-RISK -->|CHALLENGE| RESP --> END
-RISK -->|KILL| DROP
+%% ================== CONNECTIONS ==================
+A --> B
 
-RL -->|Yes| APP
-RL -->|No| QUAR --> ESC
-ESC -->|Yes| PERM --> END
-ESC -->|No| THROTTLE
+B --> |Yes| BY
+BY --> PASS
+PASS --> RES
 
-APP --> RESP
-RESP --> TEL
+B --> |No| BN0
+BN0 --> BN1
+BN1 --> |Yes| BLOCK
+BN1 --> |No| MIDD
 
+MIDD --> F0
+MIDD --> C0
+
+F0 --> F1
+F1 --> F2
+F2 --> |No| FN0
+FN0 --> FN1
+FN1 --> |Yes| PB
+FN1 --> |No| PASS
+PB --> BLOCK
+
+C0 --> C1
+C1 --> C2
+C2 --> C3
+C3 --> |Challenge| RES
+C3 --> |Allow| F0
+C3 --> |Throttle| BLOCK
+C3 --> |Kill| PB
 ```
 
 ## Public vs Private Boundary
