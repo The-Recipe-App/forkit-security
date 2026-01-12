@@ -160,6 +160,7 @@ MIDD --> C0
 F0 --> F1
 F1 --> F2
 F2 --> |No| FN0
+F2 --> |Yes| PASS
 FN0 --> FN1
 FN1 --> |Yes| PB
 FN1 --> |No| PASS
