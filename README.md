@@ -170,7 +170,7 @@ C0 --> C1
 C1 --> C2
 C2 --> C3
 C3 --> |Challenge| RES
-C3 --> |Allow| F0
+C3 --> |Allow| PASS
 C3 --> |Throttle| BLOCK
 C3 --> |Kill| PB
 ```
